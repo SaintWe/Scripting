@@ -1,0 +1,28 @@
+{
+  "intentInputTypes": [],
+  "color": "rgba(238, 92, 98,1)",
+  "icon": "person.fill",
+  "contributors": [],
+  "remoteResource": {
+    "hash": "",
+    "autoUpdateInterval": 300,
+    "url": "https://github.com/SaintWe/Scripting/releases/latest/download/RimeWordSync.scripting"
+  },
+  "localizedNames": {
+    "en": "Rime Word Sync",
+    "zh": "Rime 加词同步"
+  },
+  "description": "加词同步",
+  "localizedDescriptions": null,
+  "author": {
+    "email": "geekwem@gmail.com",
+    "homepage": "https://github.com/SaintWe",
+    "name": "SaintW"
+  },
+  "version": "1.1.0",
+  "name": "RimeWordSync",
+  "runInApp": false,
+  "changelog": [
+    "词库改为反向排序, 增加自动打开默认词库"
+  ]
+}

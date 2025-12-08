@@ -1,0 +1,26 @@
+{
+  "intentInputTypes": [],
+  "name": "YuanShuSkinPacker",
+  "runInApp": false,
+  "contributors": [],
+  "localizedNames": {
+    "zh": "元书皮肤打包",
+    "en": "YuanShu Skin Packer"
+  },
+  "version": "1.1.0",
+  "color": "rgba(238, 92, 98,1)",
+  "icon": "person.fill",
+  "author": {
+    "email": "geekwem@gmail.com",
+    "name": "SaintW",
+    "homepage": "https://github.com/SaintWe"
+  },
+  "description": "元书皮肤打包",
+  "changelog": [],
+  "remoteResource": {
+    "autoUpdateInterval": 300,
+    "url": "https://github.com/SaintWe/Scripting/releases/latest/download/YuanShuSkinPacker.scripting",
+    "hash": ""
+  },
+  "localizedDescriptions": null
+}

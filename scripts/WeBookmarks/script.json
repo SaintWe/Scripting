@@ -1,0 +1,26 @@
+{
+  "color": "rgba(238, 92, 98,1)",
+  "version": "1.1.0",
+  "icon": "doc.text.magnifyingglass",
+  "description": "WeBookmarks",
+  "runInApp": false,
+  "localizedNames": {
+    "zh": "网页书签",
+    "en": "WeBookmarks"
+  },
+  "name": "WeBookmarks",
+  "author": {
+    "name": "SaintWe",
+    "email": "geekwem@gmail.com",
+    "homepage": "https://github.com/SaintWe"
+  },
+  "intentInputTypes": [],
+  "localizedDescriptions": null,
+  "contributors": [],
+  "remoteResource": {
+    "autoUpdateInterval": 300,
+    "url": "https://github.com/SaintWe/Scripting/releases/latest/download/WeBookmarks.scripting",
+    "hash": ""
+  },
+  "changelog": []
+}

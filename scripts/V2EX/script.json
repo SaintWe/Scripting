@@ -1,0 +1,26 @@
+{
+  "color": "rgba(238, 92, 98,1)",
+  "version": "1.1.0",
+  "icon": "doc.text.magnifyingglass",
+  "description": "v2ex",
+  "runInApp": false,
+  "localizedNames": {
+    "zh": "V2EX",
+    "en": "V2EX"
+  },
+  "name": "V2EX",
+  "author": {
+    "name": "SaintWe",
+    "email": "geekwem@gmail.com",
+    "homepage": "https://github.com/SaintWe"
+  },
+  "intentInputTypes": [],
+  "localizedDescriptions": null,
+  "contributors": [],
+  "remoteResource": {
+    "autoUpdateInterval": 300,
+    "url": "https://github.com/SaintWe/Scripting/releases/latest/download/V2EX.scripting",
+    "hash": ""
+  },
+  "changelog": []
+}
