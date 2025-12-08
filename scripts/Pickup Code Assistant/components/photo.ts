@@ -11,7 +11,8 @@ export async function getLatestPhoto() {
 export async function pickPhoto() {
   const photos = await Photos.pickPhotos(1)
   if (photos == null || photos.length === 0) {
-    throw new Error("pickPhotos returns empty photo")
+    // 用户取消选择，返回 null 而不是抛出错误
+    return null
   }
   return photos[0]
 }

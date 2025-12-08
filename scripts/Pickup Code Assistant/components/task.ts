@@ -25,7 +25,12 @@ const cfgTasks: TaskItem[] = [
     title: "读取图片文件",
     status: "idle",
     func: async (from?: StartFromType) => {
-      photoGlobal = await getPhoto(from)
+      const photo = await getPhoto(from)
+      // 用户取消选择时返回 null，抛出特殊错误标记
+      if (photo == null) {
+        throw new Error("__CANCELLED__")
+      }
+      photoGlobal = photo
       return photoGlobal
     }
   },
@@ -116,8 +121,15 @@ export function runTaskWithUI(startFrom?: StartFromType) {
         updateTask(task.id, "success")
       }
       catch (e) {
+        const errorMsg = String(e)
+        // 用户取消选择时静默返回，不显示错误
+        if (errorMsg.includes("__CANCELLED__")) {
+          updateTask(task.id, "idle")
+          updateRunning(from, false)
+          return { status: true, message: "" }
+        }
         status = false
-        message = String(e)
+        message = errorMsg
         debugIfNeeded(`执行出错: ${e}`)
         updateTask(task.id, "failed")
         break
