@@ -1,0 +1,46 @@
+{
+  "description" : "This script uses AI model to act as a \"Pickup Code Assistant\", which parses information through screenshots or photos, and then displays the code on the \"Live Activities\"",
+  "version" : "1.3.2",
+  "name" : "Pickup Code Assistant",
+  "author" : {
+    "email" : "369694496@qq.com",
+    "homepage" : "https:\/\/github.com\/ryanfwy",
+    "name" : "Ryan"
+  },
+  "color" : "rgba(238, 92, 98,1)",
+  "contributors" : [
+
+  ],
+  "localizedNames" : {
+    "de" : "",
+    "fr" : "",
+    "it" : "",
+    "zh" : "取码器小助手",
+    "en" : "Pickup Code Assistant",
+    "es" : "",
+    "ja" : "",
+    "ru" : "",
+    "pt" : ""
+  },
+  "localizedDescriptions" : {
+    "ja" : "",
+    "de" : "",
+    "it" : "",
+    "en" : "This script uses AI model to act as a \"Pickup Code Assistant\", which parses information through screenshots or photos, and then displays the code on the \"Live Activities\"",
+    "fr" : "",
+    "ru" : "",
+    "zh" : "脚本使用大模型来充当【取码器小助手】，通过截图或照片来解析取餐信息，再通过【实时活动常】驻来展示取餐码",
+    "pt" : "",
+    "es" : ""
+  },
+  "remoteResource" : {
+    "url" : "https:\/\/imarkr.com\/api\/github\/download\/ryanfwy\/scripting\/tree\/master\/scripts\/Pickup Code Assistant.zip",
+    "autoUpdateInterval" : 600,
+    "hash" : "7ac70ff967deb19506ea5edaf1012fa8"
+  },
+  "icon" : "rosette",
+  "runInApp" : false,
+  "intentInputTypes" : [
+
+  ]
+}
