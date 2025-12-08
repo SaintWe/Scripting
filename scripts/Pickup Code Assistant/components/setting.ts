@@ -8,6 +8,7 @@ const runType: "latest" | "pick" = "latest"
 const systemColor: ShapeStyle | DynamicShapeStyle = "systemPink"
 const isModelDefault: boolean = true
 const modelProvider: string = ""
+const customProviderName: string = ""
 const modelId: string = ""
 const modelPrompt: string = `请从内容中精准提取两项关键信息：
 1. 取餐或取件码：仅识别纯数字（含前导0，如0135、992）或「1个字母+数字」组合（如A022、B109）或「数字.短句」组合（如8.今日是好日）或「数字+横杠」组合（如1-2-1011）
@@ -25,6 +26,7 @@ const defaults = {
   systemColor,
   isModelDefault,
   modelProvider,
+  customProviderName,
   modelId,
   modelPrompt,
 }

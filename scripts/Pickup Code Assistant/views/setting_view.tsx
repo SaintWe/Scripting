@@ -12,6 +12,7 @@ export function SettingView() {
   const systemColor = useObservable<any>(getSetting("systemColor"))
   const isModelDefault = useObservable<boolean>(getSetting("isModelDefault"))
   const modelProvider = useObservable<any>(getSetting("modelProvider"))
+  const customProviderName = useObservable<string>(getSetting("customProviderName"))
   const modelID = useObservable<string>(getSetting("modelId"))
   const modelCheck = useObservable<boolean>(true)
   const modelPrompt = useObservable<string>(getSetting("modelPrompt"))
@@ -47,7 +48,9 @@ export function SettingView() {
     { tag: "openai", text: "OpenAI" },
     { tag: "gemini", text: "Google Gemini" },
     { tag: "deepseek", text: "DeepSeek" },
-    { tag: "anthropic", text: "Anthropic" }
+    { tag: "anthropic", text: "Anthropic" },
+    { tag: "openrouter", text: "OpenRouter" },
+    { tag: "custom", text: "自定义" }
   ]
 
   function updateIsDebug(value: boolean) {
@@ -87,6 +90,11 @@ export function SettingView() {
     saveSetting("modelProvider", value)
   }
 
+  function updateCustomProviderName(value: string) {
+    customProviderName.setValue(value)
+    saveSetting("customProviderName", value)
+  }
+
   function updateModelId(value: string) {
     modelID.setValue(value)
     saveSetting("modelId", value)
@@ -105,10 +113,22 @@ export function SettingView() {
       description: ""
     }
     modelCheck.setValue(false)
-    const options = !isModelDefault.value ? {
-      provider: modelProvider.value,
-      modelId: modelID.value
-    } : undefined
+
+    // 构建 options，支持自定义提供商
+    let options: { provider: any; modelId?: string } | undefined = undefined
+    if (!isModelDefault.value) {
+      let provider: any
+      if (modelProvider.value === "custom") {
+        provider = { custom: customProviderName.value }
+      } else {
+        provider = modelProvider.value
+      }
+      options = {
+        provider,
+        modelId: modelID.value || undefined
+      }
+    }
+
     let message = ""
     try {
       const resp = await Assistant.requestStructuredData(
@@ -261,6 +281,17 @@ export function SettingView() {
               </Text>
             ))}
           </Picker>
+        )}
+        {!isModelDefault.value && modelProvider.value === "custom" && (
+          <HStack>
+            <Text>{"提供商名称"}</Text>
+            <TextField
+              multilineTextAlignment={"trailing"}
+              title={"在 App 设置中配置的名称"}
+              value={customProviderName.value}
+              onChanged={updateCustomProviderName}
+            />
+          </HStack>
         )}
         {!isModelDefault.value && (
           <HStack>

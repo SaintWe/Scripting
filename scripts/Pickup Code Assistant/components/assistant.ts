@@ -44,10 +44,28 @@ function validateAssistantResp(
 export async function requestAssistant(input: string | UIImage) {
   let data: Record<string, any>
   const prompt = getSetting("modelPrompt")
-  const options = getSetting("isModelDefault") === false ? {
-    provider: getSetting("modelProvider"),
-    modelId: getSetting("modelId")
-  } : undefined
+
+  // 构建 options
+  let options: { provider: any; modelId?: string } | undefined = undefined
+  if (getSetting("isModelDefault") === false) {
+    const providerType = getSetting("modelProvider")
+    let provider: any
+
+    if (providerType === "custom") {
+      // 自定义提供商使用 {custom: "名称"} 格式
+      const customName = getSetting("customProviderName")
+      provider = { custom: customName }
+    } else {
+      // 内置提供商直接使用字符串
+      provider = providerType
+    }
+
+    options = {
+      provider,
+      modelId: getSetting("modelId") || undefined
+    }
+  }
+
   if (typeof input === "string") {
     data = await Assistant.requestStructuredData(
       `${prompt}\n${input}`,
