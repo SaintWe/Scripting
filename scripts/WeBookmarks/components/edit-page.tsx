@@ -184,32 +184,56 @@ export const EditPage = ({ data = null, folderId = null }: { data: Webookmarks |
             <Text tag="yes" font="body">全屏显示</Text>
             <Text tag="no" font="body">非全屏显示</Text>
           </Picker>
-        </Section>
 
-        {/* SF 图标 */}
-        <Section
-          header={<Text font="headline">图标</Text>}
-          footer={<Text font="caption" foregroundStyle="secondaryLabel">输入 SF Symbol 图标名称，如 bookmark.fill、globe、star.fill 等</Text>}
-        >
-          <TextField
-            title="SF Symbol 图标名"
-            value={currentIcon}
-            onChanged={handleIconChange}
-            prompt="bookmark.fill"
-          />
-        </Section>
-
-        {/* 小组件卡片颜色 */}
-        <Section
-          header={<Text font="headline">小组件颜色</Text>}
-          footer={<Text font="caption" foregroundStyle="secondaryLabel">选择此书签在小组件上显示的卡片颜色</Text>}
-        >
           <ColorPicker
             title="卡片颜色"
             value={currentColor}
             onChanged={handleColorChange}
             supportsOpacity={false}
           />
+
+        </Section>
+
+        {/* 图标 */}
+        <Section
+          header={<Text font="headline">图标</Text>}
+          footer={<Text font="caption" foregroundStyle="secondaryLabel">输入 SF Symbol 名称或点击选择按钮浏览图标库</Text>}
+        >
+          <HStack alignment="center" spacing={8}>
+            <Image
+              systemName={currentIcon || "questionmark.square.dashed"}
+              scaleToFit
+              imageScale={'large'}
+              frame={{ width: 30, height: 30 }}
+              foregroundStyle={currentColor}
+              symbolRenderingMode={"hierarchical"}
+            />
+            <TextField
+              title="图标名"
+              value={currentIcon}
+              onChanged={handleIconChange}
+              prompt="bookmark.fill"
+              frame={{ maxWidth: "infinity" }}
+            />
+            <Button
+              title="选择"
+              buttonStyle="bordered"
+              action={async () => {
+                const { SFSymbolPicker } = await import("./sf-symbol-picker")
+                await Navigation.present({
+                  element: (
+                    <SFSymbolPicker
+                      title="选择图标"
+                      onSelect={(symbolName) => {
+                        setCurrentIcon(symbolName)
+                        HapticFeedback.mediumImpact()
+                      }}
+                    />
+                  )
+                })
+              }}
+            />
+          </HStack>
         </Section>
 
         {/* 名称 */}

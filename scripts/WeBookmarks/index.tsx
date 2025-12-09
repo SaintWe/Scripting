@@ -1,4 +1,4 @@
-import { Button, EditButton, EmptyView, ForEach, HStack, List, Navigation, NavigationStack, Script, Section, Spacer, Text, Widget } from 'scripting'
+import { Button, Color, EditButton, EmptyView, ForEach, HStack, Image, List, Navigation, NavigationStack, Script, Section, Spacer, Text, Widget } from 'scripting'
 import { useEffect, useState } from 'scripting'
 import { createWebookmarkFolder, delWebookmarkById, Folder, getCurrentSettings, processWebookmarksByFolderId, processWebookmarksFolders, reorderWebookmarks, Webookmarks } from './utils/webookmarks-service'
 import { SettingsPage } from './components/settings-page'
@@ -183,6 +183,13 @@ const FolderSection = ({ folder, onRefresh }: { folder: Folder, onRefresh: () =>
                   monospaced: true,
                   content: wIndex < 9 ? (wIndex + 1).toString() + ' ' : (wIndex + 1).toString()
                 }}
+              />
+              <Image
+                systemName={wItem.icon || 'bookmark.fill'}
+                scaleToFit
+                imageScale={'large'}
+                foregroundStyle={wItem.color as Color || 'accentColor'}
+                frame={{ width: 20, height: 20 }}
               />
               <Text>{wItem.name}</Text>
               <Spacer />
