@@ -317,7 +317,7 @@ async function processScript(
     const outputFile = path.join(DIST_DIR, `${scriptName}.scripting`)
 
     try {
-        execSync(`cd "${scriptDir}" && zip -r "${outputFile}" . -x '*.DS_Store' -x '__MACOSX/*'`, { stdio: 'pipe' })
+        execSync(`cd "${scriptDir}" && zip -rXo "${outputFile}" . -x '*.DS_Store' -x '__MACOSX/*'`, { stdio: 'pipe' })
     } catch (error) {
         console.error(`❌ 打包失败: ${scriptName}`)
         return null
