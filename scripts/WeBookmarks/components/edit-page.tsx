@@ -1,19 +1,24 @@
-import { Button, Color, ColorPicker, HStack, Image, List, Navigation, NavigationStack, Path, Picker, ProgressView, Script, Section, Spacer, Text, TextField, VStack } from 'scripting'
+import { Button, Color, ColorPicker, HStack, Image, List, Navigation, NavigationStack, Picker, Script, Section, Text, TextField, VStack } from 'scripting'
 import { useEffect, useState } from 'scripting'
 import { generateShortId, getCurrentSettings, processWebookmarksFolders, saveWebookmark, Webookmarks } from '../utils/webookmarks-service'
+import { ActionButton } from './action-button'
+import { ScriptPickerButton, ScriptInfo } from './script-picker'
 
-// 脚本信息类型
-interface ScriptInfo {
-  name: string
-  icon: string
-  color: string
+interface EditPageProps {
+  data: Webookmarks | null
+  folderId: string | null
+  /** 是否从 Intent（分享菜单）启动 */
+  isFromIntent?: boolean
+  /** Intent 模式下完成时的回调 */
+  onComplete?: () => void
 }
 
 /**
  * 书签编辑页面组件
- * 采用自动保存机制，编辑内容会自动保存
+ * App 内启动：自动保存机制
+ * Intent 启动：底部按钮手动保存/取消
  */
-export const EditPage = ({ data = null, folderId = null }: { data: Webookmarks | null, folderId: string | null }) => {
+export const EditPage = ({ data = null, folderId = null, isFromIntent = false, onComplete }: EditPageProps) => {
   const dismiss = Navigation.useDismiss()
 
   const folders = processWebookmarksFolders()
@@ -38,43 +43,6 @@ export const EditPage = ({ data = null, folderId = null }: { data: Webookmarks |
   // 创建模式下的书签 ID（仅在首次保存时生成）
   const [createdId, setCreatedId] = useState<string | null>(null)
 
-  // 脚本选择器状态
-  const [showScriptPicker, setShowScriptPicker] = useState(false)
-  const [scriptList, setScriptList] = useState<ScriptInfo[]>([])
-  const [loadingScripts, setLoadingScripts] = useState(false)
-
-  // 加载脚本列表
-  const loadScripts = async () => {
-    setLoadingScripts(true)
-    try {
-      const root = FileManager.scriptsDirectory
-      const dirs = await FileManager.readDirectory(root)
-      const scripts: ScriptInfo[] = []
-      for (const dir of dirs) {
-        const configPath = Path.join(root, dir, 'script.json')
-        if (await FileManager.exists(configPath)) {
-          try {
-            const content = await FileManager.readAsString(configPath)
-            const config = JSON.parse(content)
-            if (config.name) {
-              scripts.push({
-                name: config.name,
-                icon: config.icon || 'app.fill',
-                color: config.color || 'systemBlue'
-              })
-            }
-          } catch (e) {
-            console.error('读取脚本配置失败:', dir, e)
-          }
-        }
-      }
-      setScriptList(scripts)
-    } catch (e) {
-      console.error('加载脚本列表失败:', e)
-    }
-    setLoadingScripts(false)
-  }
-
   // 选择脚本后填充信息
   const handleSelectScript = (script: ScriptInfo) => {
     const url = Script.createRunURLScheme(script.name)
@@ -82,8 +50,6 @@ export const EditPage = ({ data = null, folderId = null }: { data: Webookmarks |
     setCurrentName(script.name)
     setCurrentIcon(script.icon)
     setCurrentColor(script.color as Color)
-    setShowScriptPicker(false)
-    HapticFeedback.mediumImpact()
   }
 
   // 自动保存函数
@@ -115,14 +81,33 @@ export const EditPage = ({ data = null, folderId = null }: { data: Webookmarks |
     }
   }
 
-  // 监听所有字段变化，自动保存
+  // 监听所有字段变化，自动保存（仅 App 内模式）
   useEffect(() => {
+    if (isFromIntent) return // Intent 模式不自动保存
     // 延迟保存，避免频繁写入
     const timer = setTimeout(() => {
       autoSave()
     }, 500)
     return () => clearTimeout(timer)
   }, [currentFolderId, currentName, currentURL, currentColor, currentIcon, openMode, fullscreenMode])
+
+  // Intent 模式下的手动保存
+  const handleIntentSave = () => {
+    if (!currentName.trim() || !currentURL.trim()) {
+      Dialog.alert({ title: "提示", message: "请填写名称和 URL" })
+      return
+    }
+    autoSave()
+    HapticFeedback.notificationSuccess()
+    onComplete?.()
+    dismiss()
+  }
+
+  // Intent 模式下的取消
+  const handleIntentCancel = () => {
+    onComplete?.()
+    dismiss()
+  }
 
   const handleFolderIdChange = (id: string) => {
     setCurrentFolderId(id)
@@ -151,9 +136,9 @@ export const EditPage = ({ data = null, folderId = null }: { data: Webookmarks |
   return (
     <NavigationStack>
       <List
-        navigationTitle={data ? "编辑书签" : "新建书签"}
+        navigationTitle={isFromIntent ? "添加书签" : (data?.id ? "编辑书签" : "新建书签")}
         navigationBarTitleDisplayMode="large"
-        toolbar={{
+        toolbar={isFromIntent ? undefined : {
           cancellationAction: <Button title="完成" action={dismiss} />
         }}
       >
@@ -267,60 +252,35 @@ export const EditPage = ({ data = null, folderId = null }: { data: Webookmarks |
               lineLimit={{ min: 2, max: 6 }}
             />
           </VStack>
-          <Button
-            title="选择脚本启动"
-            action={() => {
-              loadScripts()
-              setShowScriptPicker(true)
-            }}
-            sheet={{
-              isPresented: showScriptPicker,
-              onChanged: setShowScriptPicker,
-              content: (
-                <NavigationStack>
-                  <List
-                    navigationTitle="选择脚本"
-                    navigationBarTitleDisplayMode="inline"
-                    toolbar={{
-                      cancellationAction: <Button title="取消" action={() => setShowScriptPicker(false)} />
-                    }}
-                  >
-                    <Section
-                      footer={<Text font="caption" foregroundStyle="secondaryLabel">
-                        选择脚本后将自动填充 URL、名称、图标和颜色
-                      </Text>}
-                    >
-                      {loadingScripts ? (
-                        <ProgressView />
-                      ) : scriptList.length === 0 ? (
-                        <Text foregroundStyle="secondaryLabel">暂无可用脚本</Text>
-                      ) : (
-                        scriptList.map((script, idx) => (
-                          <Button
-                            key={idx}
-                            buttonStyle="plain"
-                            action={() => handleSelectScript(script)}
-                          >
-                            <HStack spacing={12}>
-                              <Image
-                                systemName={script.icon}
-                                foregroundStyle={script.color as Color}
-                                font="title3"
-                              />
-                              <Text font="body">{script.name}</Text>
-                              <Spacer />
-                              <Image systemName="chevron.right" foregroundStyle="tertiaryLabel" />
-                            </HStack>
-                          </Button>
-                        ))
-                      )}
-                    </Section>
-                  </List>
-                </NavigationStack>
-              )
-            }}
-          />
+          {/* Intent 模式下隐藏脚本选择器 */}
+          {!isFromIntent && (
+            <ScriptPickerButton
+              title="选择脚本启动"
+              onSelect={handleSelectScript}
+            />
+          )}
         </Section>
+
+        {/* Intent 模式下的底部按钮 */}
+        {isFromIntent && (
+          <HStack spacing={15} listRowBackground={<VStack background="clear" />} listRowInsets={{ top: 0, leading: 0, bottom: 0, trailing: 0 }}>
+            <ActionButton
+              title="取消"
+              icon="xmark"
+              color="systemGray5"
+              gradient={false}
+              cornerRadius={28}
+              onTap={handleIntentCancel}
+            />
+            <ActionButton
+              title="保存"
+              icon="checkmark"
+              color="systemBlue"
+              cornerRadius={28}
+              onTap={handleIntentSave}
+            />
+          </HStack>
+        )}
 
       </List>
     </NavigationStack>

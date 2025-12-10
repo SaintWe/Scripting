@@ -14,7 +14,9 @@
     "email": "geekwem@gmail.com",
     "homepage": "https://github.com/SaintWe"
   },
-  "intentInputTypes": [],
+  "intentInputTypes": [
+    "URLs"
+  ],
   "localizedDescriptions": null,
   "contributors": [],
   "remoteResource": {

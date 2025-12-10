@@ -2,8 +2,9 @@
  * 数据管理页面
  * 导入导出书签数据，采用大圆角矩形按钮样式
  */
-import { Button, HStack, Image, Navigation, NavigationStack, RoundedRectangle, Text, VStack } from 'scripting'
+import { Button, HStack, Navigation, NavigationStack, Text, VStack } from 'scripting'
 import { exportToClipboard, exportToFile, importFromClipboard, importFromFile } from '../utils/data-service'
+import { ActionCard } from './action-button'
 
 /**
  * 数据管理页面组件
@@ -135,52 +136,5 @@ export const DataPage = () => {
                 </Text>
             </VStack>
         </NavigationStack>
-    )
-}
-
-/**
- * 操作卡片组件
- */
-const ActionCard = ({
-    icon,
-    title,
-    color,
-    onTap
-}: {
-    icon: string
-    title: string
-    color: string
-    onTap: () => void
-}) => {
-    return (
-        <Button buttonStyle="plain" action={onTap}>
-            <RoundedRectangle
-                cornerRadius={20}
-                fill={{
-                    color: color as any,
-                    gradient: true
-                }}
-                frame={{ height: 100 }}
-                overlay={
-                    <VStack spacing={8} padding={16}>
-                        <Image
-                            systemName={icon}
-                            font="title2"
-                            fontWeight="semibold"
-                            foregroundStyle="white"
-                        />
-                        <Text
-                            font="subheadline"
-                            fontWeight="medium"
-                            foregroundStyle="white"
-                            lineLimit={2}
-                            minScaleFactor={0.8}
-                        >
-                            {title}
-                        </Text>
-                    </VStack>
-                }
-            />
-        </Button>
     )
 }
