@@ -1,97 +1,100 @@
 import { Path } from "scripting"
 import { getCurrentSettings } from "./utils/skinPacker-service"
 
+/**
+ * 编译正则表达式列表
+ */
+const compileRegexes = (patterns: string[]): RegExp[] => {
+    return patterns
+        .filter(p => p?.trim())
+        .map(p => {
+            try {
+                return new RegExp(p)
+            } catch {
+                console.error(`无效的正则: ${p}`)
+                return null
+            }
+        })
+        .filter((r): r is RegExp => r !== null)
+}
+
+/**
+ * 递归清理目录中匹配正则的文件
+ */
+const cleanDirectory = async (dirPath: string, regexes: RegExp[]): Promise<void> => {
+    const files = await FileManager.readDirectory(dirPath)
+
+    for (const file of files) {
+        const filePath = Path.join(dirPath, file)
+
+        if (await FileManager.isFile(filePath)) {
+            // 检查文件是否匹配任一正则
+            if (regexes.some(regex => regex.test(filePath))) {
+                await FileManager.remove(filePath)
+            }
+        } else if (await FileManager.isDirectory(filePath)) {
+            // 递归处理子目录
+            await cleanDirectory(filePath, regexes)
+            // 删除空目录
+            const remaining = await FileManager.readDirectory(filePath)
+            if (remaining.length === 0) {
+                await FileManager.remove(filePath)
+            }
+        }
+    }
+}
+
+/**
+ * 安全删除文件或目录
+ */
+const safeRemove = async (path: string): Promise<void> => {
+    try {
+        if (await FileManager.exists(path)) {
+            await FileManager.remove(path)
+        }
+    } catch (e) {
+        console.error(`删除失败: ${path}`, e)
+    }
+}
 
 /**
  * 生成 Skin 文件
+ * @param path 源目录路径
+ * @param extname 输出文件扩展名
  */
 export const genSkin = async (path: string, extname: string): Promise<void> => {
     const dirName = Path.basename(path)
-    const zipFileName = dirName + '.' + extname
-    console.log(zipFileName)
-
+    const zipFileName = `${dirName}.${extname}`
     const tempPath = Path.join(FileManager.scriptsDirectory, '..', 'tempfiles')
-    console.log(tempPath)
-
     const tempDirPath = Path.join(tempPath, dirName)
-    console.log(tempDirPath)
-
     const outputZipPath = Path.join(tempPath, zipFileName)
-    console.log(outputZipPath)
 
     try {
-        if (await FileManager.isDirectory(tempDirPath)) {
-            console.log('删除临时目录')
-            await FileManager.remove(tempDirPath)
-        }
+        // 1. 准备临时目录
+        await safeRemove(tempDirPath)
         await FileManager.createDirectory(tempDirPath, true)
-        await FileManager.copyFile(path, tempDirPath + '/')
-        console.log(`拷贝完成`)
 
+        // 2. 复制源文件
+        await FileManager.copyFile(path, Path.join(tempDirPath, ''))
+
+        // 3. 清理匹配正则的文件
         const pathRegex = getCurrentSettings().pathRegex
+        const compiledRegexes = compileRegexes(pathRegex)
+        await cleanDirectory(tempDirPath, compiledRegexes)
 
-        const compiledRegexes = pathRegex
-            .filter(r => r && r.trim() !== '')
-            .map(r => {
-                try {
-                    return new RegExp(r)
-                } catch (e) {
-                    console.error(`无效的正则: ${r}`, e)
-                    return null
-                }
-            })
-            .filter(r => r !== null) as RegExp[]
-
-        // 递归删除匹配文件
-        const cleanDirectory = async (dirPath: string) => {
-            const files = await FileManager.readDirectory(dirPath)
-            console.log(`开始循环`)
-            for (const file of files) {
-                const filePath = dirPath + '/' + file
-                console.log(`当前路径：${filePath}`)
-                if (await FileManager.isFile(filePath)) {
-                    console.log(`是文件`)
-                    if (compiledRegexes.some((regex) => regex.test(filePath))) {
-                        console.log(`匹配删除`)
-                        await FileManager.remove(filePath)
-                        console.log(`已删除`)
-                    }
-                } else if (await FileManager.isDirectory(filePath)) {
-                    console.log(`递归处理子目录: ${filePath}`)
-                    await cleanDirectory(filePath)
-                    const cleanDir = await FileManager.readDirectory(filePath)
-                    if (cleanDir.length === 0) {
-                        console.log(`空目录删除: ${filePath}`)
-                        await FileManager.remove(filePath)
-                    }
-                }
-            }
-        }
-
-        console.log(`开始清理`)
-        await cleanDirectory(tempDirPath)
-
-        if (await FileManager.isFile(outputZipPath)) {
-            await FileManager.remove(outputZipPath)
-            console.log(`删除旧的 zip: ${outputZipPath}`)
-        }
-
-        console.log(`Zip: ${outputZipPath}`)
+        // 4. 生成 ZIP 文件
+        await safeRemove(outputZipPath)
         await FileManager.zip(tempDirPath, outputZipPath, true)
-        console.log(`Zip 创建成功`)
 
+        // 5. 预览结果
         await QuickLook.previewURLs([outputZipPath])
 
     } catch (error) {
         console.error(`生成失败: ${error}`)
         throw error
     } finally {
-        if (await FileManager.isDirectory(tempDirPath)) {
-            await FileManager.remove(tempDirPath)
-            console.log(`清理临时文件夹: ${tempDirPath}`)
-        }
-        await FileManager.remove(outputZipPath)
-        console.log(`清理临时 ZIP 文件: ${outputZipPath}`)
+        // 清理临时文件
+        await safeRemove(tempDirPath)
+        await safeRemove(outputZipPath)
     }
 }
-
